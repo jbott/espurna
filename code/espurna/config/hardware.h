@@ -1761,7 +1761,7 @@
     #define DEVICE              "AL_LC02"
     #define RELAY_PROVIDER      RELAY_PROVIDER_LIGHT
     #define LIGHT_PROVIDER      LIGHT_PROVIDER_DIMMER
-    #define DUMMY_RELAY_COUNT   1
+    #define DUMMY_RELAY_COUNT   2
 
     // Light
     #define LIGHT_CHANNELS      4

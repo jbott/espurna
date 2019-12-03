@@ -277,6 +277,15 @@ void _relayProviderStatus(unsigned char id, bool status) {
                 } else {
                     lightState(id-1-physical, status);
                 }
+            } else if (_relayDummy == 2u) {
+                if (id == physical) {
+                    for (int ch = 0; ch < (lightChannels() - 1); ch++) {
+                        lightState(ch, status);
+                    }
+                } else {
+                    lightState(lightChannels() - 1, status);
+                }
+                lightState(true);
             } else {
                 lightState(status);
             }
