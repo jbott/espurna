@@ -241,8 +241,12 @@ void _fromRGB(const char * rgb) {
 
     // HEX value is always prefixed, like CSS
     // values are interpreted like RGB + optional brightness
-    if (rgb[0] == '#') {
-        _fromLong(strtoul(rgb + 1, nullptr, 16), strlen(rgb + 1) > 7);
+    if (rgb[0] == '#' || nullptr == strchr(rgb, ',')) {
+        if (rgb[0] == '#') {
+            _fromLong(strtoul(rgb + 1, nullptr, 16), strlen(rgb + 1) > 7);
+        } else {
+            _fromLong(strtoul(rgb, nullptr, 16), strlen(rgb) > 7);
+        }
     // With comma separated string, assume decimal values
     } else {
         const auto channels = _light_channel.size();
