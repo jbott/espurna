@@ -504,12 +504,24 @@ int _lightAdjustValue(const int& value, const String& operation) {
     return updated;
 }
 
-void _lightAdjustBrightness(const char *payload) {
-    lightBrightness(_lightAdjustValue(lightBrightness(), payload));
+void _lightAdjustBrightness(const char *payload, bool scale) {
+    int value = _lightAdjustValue(lightBrightness(), payload);
+
+    if (scale) {
+        value = value * 255 / 100;
+    }
+
+    lightBrightness(value);
 }
 
-void _lightAdjustChannel(unsigned char id, const char *payload) {
-    lightChannel(id, _lightAdjustValue(lightChannel(id), payload));
+void _lightAdjustChannel(unsigned char id, const char *payload, bool scale) {
+    int value = _lightAdjustValue(lightChannel(id), payload);
+
+    if (scale) {
+        value = value * 255 / 100;
+    }
+
+    lightChannel(id, value);
 }
 
 void _lightAdjustKelvin(const char *payload) {
@@ -721,7 +733,7 @@ void _lightMQTTCallback(unsigned int type, const char * topic, const char * payl
 
         // Brightness
         if (t.equals(MQTT_TOPIC_BRIGHTNESS)) {
-            _lightAdjustBrightness(payload);
+            _lightAdjustBrightness(payload, true);
             lightUpdate(true, mqttForward());
             return;
         }
@@ -739,7 +751,7 @@ void _lightMQTTCallback(unsigned int type, const char * topic, const char * payl
                 DEBUG_MSG_P(PSTR("[LIGHT] Wrong channelID (%d)\n"), channelID);
                 return;
             }
-            _lightAdjustChannel(channelID, payload);
+            _lightAdjustChannel(channelID, payload, true);
             lightUpdate(true, mqttForward());
             return;
         }
@@ -1141,7 +1153,7 @@ void _lightAPISetup() {
                 snprintf_P(buffer, len, PSTR("%d"), _light_channel[id].target);
             },
             [id](const char * payload) {
-                _lightAdjustChannel(id, payload);
+                _lightAdjustChannel(id, payload, false);
                 lightUpdate(true, true);
             }
         );
@@ -1162,7 +1174,7 @@ void _lightAPISetup() {
             snprintf_P(buffer, len, PSTR("%d"), _light_brightness);
         },
         [](const char * payload) {
-            _lightAdjustBrightness(payload);
+            _lightAdjustBrightness(payload, false);
             lightUpdate(true, true);
         }
     );
@@ -1181,7 +1193,7 @@ void _lightInitCommands() {
 
     terminalRegisterCommand(F("BRIGHTNESS"), [](Embedis* e) {
         if (e->argc > 1) {
-            _lightAdjustBrightness(e->argv[1]);
+            _lightAdjustBrightness(e->argv[1], false);
             lightUpdate(true, true);
         }
         DEBUG_MSG_P(PSTR("Brightness: %u\n"), lightBrightness());
@@ -1204,7 +1216,7 @@ void _lightInitCommands() {
         }
 
         if (e->argc > 2) {
-            _lightAdjustChannel(id, e->argv[2]);
+            _lightAdjustChannel(id, e->argv[2], false);
             lightUpdate(true, true);
         }
 
